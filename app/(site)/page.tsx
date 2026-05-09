@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Sparkles, Globe, Calendar, Crown } from "lucide-react";
@@ -28,9 +28,23 @@ const fadeLine = {
 /* ─── Page ──────────────────────────────────────────────────────────────── */
 export default function LandingPage() {
   const heroRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "20%"]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.load();
+    const onCanPlay = () => {
+      video.play().catch(() => {});
+      setVideoLoaded(true);
+    };
+    video.addEventListener("canplaythrough", onCanPlay, { once: true });
+    return () => video.removeEventListener("canplaythrough", onCanPlay);
+  }, []);
 
   return (
     <div className="bg-background text-foreground overflow-x-hidden">
@@ -40,6 +54,22 @@ export default function LandingPage() {
         ref={heroRef}
         className="relative min-h-screen flex items-center justify-center overflow-hidden bg-black"
       >
+        {/* Vidéo de fond */}
+        <video
+          ref={videoRef}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${videoLoaded ? "opacity-40" : "opacity-0"}`}
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          aria-hidden="true"
+        >
+          <source src="/videos/hero-bg.mp4" type="video/mp4" />
+        </video>
+
+        {/* Overlay sombre pour lisibilité du texte */}
+        <div className="absolute inset-0 bg-black/50 pointer-events-none" />
+
         {/* Grain de fond */}
         <div
           className="absolute inset-0 opacity-[0.03] pointer-events-none"
@@ -48,9 +78,6 @@ export default function LandingPage() {
             backgroundSize: "200px",
           }}
         />
-
-        {/* Lumière ambiante subtile */}
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/[0.02] rounded-full blur-3xl pointer-events-none" />
 
         <motion.div
           style={{ y: heroY, opacity: heroOpacity }}
