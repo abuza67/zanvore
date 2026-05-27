@@ -162,7 +162,7 @@ export default function RegistryPage() {
         transition={{ delay: 0.3, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="fixed bottom-8 right-8 flex items-center gap-2.5 bg-white text-black text-sm font-medium pl-4 pr-5 py-3.5 rounded-full shadow-2xl hover:bg-white/95 transition-colors z-40"
+        className="fixed bottom-24 right-8 flex items-center gap-2.5 bg-white text-black text-sm font-medium pl-4 pr-5 py-3.5 rounded-full shadow-2xl hover:bg-white/95 transition-colors z-40"
       >
         <Plus size={16} />
         Nouveau rêve
