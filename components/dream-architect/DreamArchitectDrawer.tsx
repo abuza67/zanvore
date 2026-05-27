@@ -59,10 +59,13 @@ export default function DreamArchitectDrawer() {
 
     try {
       const dreams = dreamsStore.getAll();
+      const history = messages
+        .filter((m) => m.id !== userMsg.id)
+        .map((m) => ({ role: m.role === "architect" ? "assistant" : "user", content: m.content }));
       const res = await fetch("/api/dream-architect", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text, dreams }),
+        body: JSON.stringify({ message: text, dreams, history }),
       });
       const data = await res.json();
       const reply: Message = {
