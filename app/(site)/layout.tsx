@@ -1,6 +1,6 @@
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
-import DreamArchitectDrawer from "@/components/dream-architect/DreamArchitectDrawer";
+import LuxuryConciergeDrawer from "@/components/concierge/LuxuryConciergeDrawer";
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -8,7 +8,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />
-      <DreamArchitectDrawer />
+      <LuxuryConciergeDrawer />
     </>
   );
 }
