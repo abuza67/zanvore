@@ -2,13 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { User, Building2, ArrowRight, Check } from "lucide-react";
+import { signUp } from "@/lib/auth-client";
 
 type AccountType = "personal" | "company" | null;
 type Step = "type" | "form";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [accountType, setAccountType] = useState<AccountType>(null);
   const [step, setStep] = useState<Step>("type");
   const [form, setForm] = useState({
@@ -19,6 +22,8 @@ export default function RegisterPage() {
     companyName: "",
     industry: "",
   });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   function handleTypeSelect(type: AccountType) {
     setAccountType(type);
@@ -28,9 +33,33 @@ export default function RegisterPage() {
     if (accountType) setStep("form");
   }
 
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    const name =
+      accountType === "company"
+        ? form.companyName
+        : `${form.firstName} ${form.lastName}`.trim();
+
+    const { error } = await signUp.email({
+      email: form.email,
+      password: form.password,
+      name,
+    });
+
+    if (error) {
+      setError(error.message ?? "Une erreur est survenue.");
+      setLoading(false);
+      return;
+    }
+
+    router.push("/feed");
+  }
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      {/* Header */}
       <header className="border-b border-[#E5E5E5] px-6 h-14 flex items-center justify-between">
         <Link
           href="/"
@@ -40,7 +69,8 @@ export default function RegisterPage() {
           Zanvore
         </Link>
         <Link href="/login" className="text-sm text-[#737373] hover:text-[#0A0A0A] transition-colors">
-          Déjà membre ? <span className="text-[#0A0A0A] font-medium">Se connecter</span>
+          Déjà membre ?{" "}
+          <span className="text-[#0A0A0A] font-medium">Se connecter</span>
         </Link>
       </header>
 
@@ -134,7 +164,7 @@ export default function RegisterPage() {
                   </div>
                 </div>
 
-                <form className="flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>
+                <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
                   {accountType === "company" ? (
                     <>
                       <FormField
@@ -179,14 +209,20 @@ export default function RegisterPage() {
                     type="password"
                     value={form.password}
                     onChange={(v) => setForm((f) => ({ ...f, password: v }))}
-                    placeholder="12 caractères minimum"
+                    placeholder="8 caractères minimum"
                   />
+
+                  {error && (
+                    <p className="text-red-500 text-xs">{error}</p>
+                  )}
 
                   <button
                     type="submit"
-                    className="mt-2 w-full bg-[#0A0A0A] text-white text-sm font-medium py-3.5 rounded-[10px] flex items-center justify-center gap-2 hover:bg-[#262626] transition-colors"
+                    disabled={loading}
+                    className="mt-2 w-full bg-[#0A0A0A] text-white text-sm font-medium py-3.5 rounded-[10px] flex items-center justify-center gap-2 hover:bg-[#262626] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Créer mon compte <ArrowRight size={15} />
+                    {loading ? "Création…" : "Créer mon compte"}
+                    {!loading && <ArrowRight size={15} />}
                   </button>
                 </form>
               </motion.div>
@@ -263,6 +299,7 @@ function FormField({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        required
         className="bg-[#F5F5F5] border border-transparent text-[#0A0A0A] text-sm rounded-[10px] px-4 py-3 outline-none focus:bg-white focus:border-[#E5E5E5] placeholder:text-[#A3A3A3] transition-all"
       />
     </div>
